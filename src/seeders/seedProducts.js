@@ -1,6 +1,11 @@
-import ProductRepository from '../repositories/ProductRepository.js';
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+import Product from '../models/Product.js';
+import connectDB from '../config/db.js';
 
-const sampleProducts = [
+dotenv.config();
+
+const products = [
   { name: 'Laptop', description: 'High-performance laptop', price: 999.99, sku: 'LAP001' },
   { name: 'Smartphone', description: 'Latest smartphone model', price: 699.99, sku: 'SPH001' },
   { name: 'Headphones', description: 'Noise-cancelling headphones', price: 199.99, sku: 'HDP001' },
@@ -58,29 +63,17 @@ const sampleProducts = [
   { name: 'Bike', description: 'Stationary exercise bike', price: 399.99, sku: 'BIK001' },
 ];
 
-export default class ProductService {
-  static async createProduct(data) {
-    return ProductRepository.create(data);
+const seedProducts = async () => {
+  try {
+    await connectDB();
+    await Product.deleteMany({});
+    await Product.insertMany(products);
+    console.log('Products seeded successfully');
+    process.exit();
+  } catch (error) {
+    console.error('Error seeding products:', error);
+    process.exit(1);
   }
+};
 
-  static async getProduct(id) {
-    return ProductRepository.findById(id);
-  }
-
-  static async updateProduct(id, data) {
-    return ProductRepository.update(id, data);
-  }
-
-  static async deleteProduct(id) {
-    return ProductRepository.delete(id);
-  }
-
-  static async listProducts(filter) {
-    try {
-      return await ProductRepository.list(filter);
-    } catch (error) {
-      console.log('Database not available, returning sample data');
-      return sampleProducts;
-    }
-  }
-}
+seedProducts();
